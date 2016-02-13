@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -33,6 +34,8 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.kubotaku.android.sample.sensordataviewer.api.ScalenicsAccessor;
 import com.kubotaku.android.sample.sensordataviewer.model.ChannelEntity;
@@ -337,6 +340,7 @@ public class SensorDataActivity extends AppCompatActivity {
         lineChart.setNoDataTextDescription("No Sensor Data...");
         lineChart.setTouchEnabled(true);
         lineChart.setPinchZoom(true);
+        lineChart.setDoubleTapToZoomEnabled(true);
     }
 
     private LineData createLineData(StreamEntity entity) {
@@ -360,16 +364,19 @@ public class SensorDataActivity extends AppCompatActivity {
         LineDataSet dataSet = new LineDataSet(yVals, channelEntity.getValue1_name());
         dataSet.setLineWidth(3.0f);
         dataSet.setDrawCubic(false);
-        dataSet.setDrawCircles(false);
+        dataSet.setDrawCircles(true);
+        dataSet.setCircleColor(Color.MAGENTA);
         dataSet.setColor(Color.MAGENTA);
 
         return new LineData(xVals, dataSet);
     }
 
     private void showLastHourStreamData(StreamEntity entity) {
-
-        // TODO: error check
         if (entity == null) {
+            return;
+        }
+
+        if (entity.getStream() == null) {
             return;
         }
 
@@ -380,14 +387,18 @@ public class SensorDataActivity extends AppCompatActivity {
         lineData.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-                return String.format(Locale.getDefault(), "%.1f", value);
+                final float scaleX = viewPortHandler.getScaleX();
+                if (scaleX > 3) {
+                    return String.format(Locale.getDefault(), "%.1f", value);
+                }
+                return "";
             }
         });
 
         this.lineChart.setData(lineData);
         this.lineChart.setVisibility(View.VISIBLE);
         this.lineChart.setAutoScaleMinMaxEnabled(true);
-        this.lineChart.setVisibleXRangeMaximum(5f);
+        this.lineChart.setVisibleXRangeMinimum(3f);
         this.lineChart.invalidate();
         this.lineChart.animateX(1000);
     }
