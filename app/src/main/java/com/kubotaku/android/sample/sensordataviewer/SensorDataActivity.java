@@ -26,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -242,6 +243,7 @@ public class SensorDataActivity extends AppCompatActivity {
         String lastUpdateTime = ScalenicsAccessor.convertISO8601ToNormalDateFormatText(newestValues.getAt());
         TextView textLastUpdate = (TextView) findViewById(R.id.sensor_data_text_last_update);
         textLastUpdate.setText(lastUpdateTime);
+        setShowValueAnimation(textLastUpdate);
     }
 
     private void showAverageStreamData(StreamEntity entity) {
@@ -313,6 +315,10 @@ public class SensorDataActivity extends AppCompatActivity {
     }
 
     private void showValue(double value, TextView showArea) {
+        if (showArea == null) {
+            return;
+        }
+
         final int sensorType = channelEntity.getSensorType();
         switch (sensorType) {
             default:
@@ -331,6 +337,15 @@ public class SensorDataActivity extends AppCompatActivity {
                 break;
 
         }
+
+        setShowValueAnimation(showArea);
+    }
+
+    private void setShowValueAnimation(View view) {
+        final AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+        alphaAnimation.setDuration(750);
+        alphaAnimation.setFillAfter(true);
+        view.setAnimation(alphaAnimation);
     }
 
 
