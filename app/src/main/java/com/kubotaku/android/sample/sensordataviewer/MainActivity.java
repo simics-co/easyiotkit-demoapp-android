@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -48,6 +49,8 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity
         implements ApiTokenSettingDialogFragment.OnDialogDismissListener {
+
+    private static final String FRAGMENT_TAG_SETTING = "fragment_setting_dlg";
 
     private ProgressBar progressBar;
 
@@ -80,8 +83,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showSetupApiTokenDialog() {
-        ApiTokenSettingDialogFragment fragment = ApiTokenSettingDialogFragment.newInstance();
-        fragment.show(getSupportFragmentManager(), null);
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(FRAGMENT_TAG_SETTING) == null) {
+            ApiTokenSettingDialogFragment fragment = ApiTokenSettingDialogFragment.newInstance();
+            fragment.show(fragmentManager, FRAGMENT_TAG_SETTING);
+        }
     }
 
     @Override
