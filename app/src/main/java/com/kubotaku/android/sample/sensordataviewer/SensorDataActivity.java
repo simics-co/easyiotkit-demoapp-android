@@ -54,7 +54,7 @@ import java.util.Locale;
  * Activity for Sensor Data view.
  */
 public class SensorDataActivity extends AppCompatActivity
-                        implements OnDialogFragmentDismissListener {
+        implements OnDialogFragmentDismissListener {
 
     public static final String VIEW_NAME_HEADER_IMAGE = "view_name_header_image";
 
@@ -234,38 +234,38 @@ public class SensorDataActivity extends AppCompatActivity
                     case TASK_LAST_HOUR: {
                         if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
                             entity = scalenicsAccessor.getLastNHourStreamData("" + channel, presetTime);
-                        }else {
+                        } else {
                             entity = scalenicsAccessor.getSelectTimeStreamData("" + channel, selectTimeFrom, selectTimeTo);
                         }
                     }
-                        break;
+                    break;
 
                     case TASK_AVG_LAST_HOUR: {
                         if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
                             entity = scalenicsAccessor.getLastNHourAvgStreamData("" + channel, presetTime);
-                        }else {
+                        } else {
                             entity = scalenicsAccessor.getSelectTimeAvgStreamData("" + channel, selectTimeFrom, selectTimeTo);
                         }
                     }
-                        break;
+                    break;
 
                     case TASK_MIN_LAST_HOUR: {
                         if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
                             entity = scalenicsAccessor.getLastNHourMinStreamData("" + channel, presetTime);
-                        }else {
+                        } else {
                             entity = scalenicsAccessor.getSelectTimeMinStreamData("" + channel, selectTimeFrom, selectTimeTo);
                         }
                     }
-                        break;
+                    break;
 
                     case TASK_MAX_LAST_HOUR: {
                         if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
                             entity = scalenicsAccessor.getLastNHourMaxStreamData("" + channel, presetTime);
-                        }else {
+                        } else {
                             entity = scalenicsAccessor.getSelectTimeMaxStreamData("" + channel, selectTimeFrom, selectTimeTo);
                         }
                     }
-                        break;
+                    break;
                 }
 
 
