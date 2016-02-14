@@ -1,11 +1,9 @@
 <resources>
     <string name="app_name">お手軽IoTキット デモ</string>
 
-    <string name="button_ok">OK</string>
-    <string name="button_cancel">Cancel</string>
     <string name="settings_edit_hint_api_token">Please input API Token</string>
     <string name="msg_fail_get_channel_info">Failed to get channel information...\nPlease check API Token.</string>
     <string name="menu_set_api_token">Set API Token</string>
-    <string name="action_settings">Settings</string>
+    <string name="menu_select_stream_time">Select Stream Time</string>
     <string name="sensor_data_title_last_update">Last Update :</string>
 </resources>

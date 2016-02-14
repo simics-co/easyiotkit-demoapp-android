@@ -1,0 +1,167 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_vertical_margin"
+    tools:context="com.kubotaku.android.sample.sensordataviewer.SelectStreamTimeFragment">
+
+    <RadioGroup
+        android:id="@+id/select_time_rg_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <RadioButton
+            android:id="@+id/select_time_rb_preset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="指定期間を選択する" />
+
+
+        <RadioButton
+            android:id="@+id/select_time_rb_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="指定期間を詳細設定する" />
+
+    </RadioGroup>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#888" />
+
+    <!-- 期間をプリセットから選択 -->
+    <RadioGroup
+        android:id="@+id/select_time_rg_preset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/select_time_rb_1hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1時間前までのデータを取得する" />
+
+        <RadioButton
+            android:id="@+id/select_time_rb_3hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3時間前までのデータを取得する" />
+
+        <RadioButton
+            android:id="@+id/select_time_rb_6hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="6時間前までのデータを取得する" />
+
+        <RadioButton
+            android:id="@+id/select_time_rb_12hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12時間前までのデータを取得する" />
+
+        <RadioButton
+            android:id="@+id/select_time_rb_24hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="24時間前までのデータを取得する" />
+
+    </RadioGroup>
+
+    <!-- 期間詳細設定 -->
+    <android.support.v7.widget.GridLayout
+        android:id="@+id/select_time_gl_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:columnCount="3"
+        app:rowCount="2">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="開始日時："
+            app:layout_column="0"
+            app:layout_columnWeight="1"
+            app:layout_row="0" />
+
+        <Button
+            android:id="@+id/select_time_btn_date_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            app:layout_column="1"
+            app:layout_columnWeight="1"
+            app:layout_row="0" />
+
+        <Button
+            android:id="@+id/select_time_btn_time_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            app:layout_column="2"
+            app:layout_columnWeight="1"
+            app:layout_row="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="修了日時："
+            app:layout_column="0"
+            app:layout_columnWeight="1"
+            app:layout_row="1" />
+
+        <Button
+            android:id="@+id/select_time_btn_date_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            app:layout_column="1"
+            app:layout_columnWeight="1"
+            app:layout_row="1" />
+
+        <Button
+            android:id="@+id/select_time_btn_time_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            app:layout_column="2"
+            app:layout_columnWeight="1"
+            app:layout_row="1" />
+
+    </android.support.v7.widget.GridLayout>
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/select_time_btn_cancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/cancel" />
+
+        <Button
+            android:id="@+id/select_time_btn_ok"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/ok" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

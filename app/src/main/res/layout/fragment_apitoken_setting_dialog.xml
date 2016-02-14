@@ -9,24 +9,30 @@
         android:id="@+id/settings_edit_api_token"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/settings_edit_hint_api_token"/>
+        android:hint="@string/settings_edit_hint_api_token" />
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/settings_button_ok"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/button_ok" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/settings_button_cancel"
-            android:layout_width="0dp"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/button_cancel" />
+            android:text="@android:string/cancel" />
+
+        <Button
+            android:id="@+id/settings_button_ok"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/ok" />
+
     </LinearLayout>
+
 </LinearLayout>

@@ -37,17 +37,7 @@ import android.widget.EditText;
  */
 public class ApiTokenSettingDialogFragment extends DialogFragment {
 
-    /**
-     * ダイアログを閉じる際のイベントリスナー
-     */
-    public interface OnDialogDismissListener {
-        /**
-         * ダイアログが閉じた。
-         */
-        void onDismiss();
-    }
-
-    private OnDialogDismissListener onDialogDismissListener;
+    private OnDialogFragmentDismissListener onDialogDismissListener;
 
     private String apiToken;
 
@@ -78,8 +68,8 @@ public class ApiTokenSettingDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof OnDialogDismissListener) {
-            this.onDialogDismissListener = (OnDialogDismissListener) activity;
+        if (activity instanceof OnDialogFragmentDismissListener) {
+            this.onDialogDismissListener = (OnDialogFragmentDismissListener) activity;
         }
     }
 

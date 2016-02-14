@@ -24,7 +24,9 @@ import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
@@ -35,22 +37,24 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.listener.ChartTouchListener;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.kubotaku.android.sample.sensordataviewer.api.ScalenicsAccessor;
 import com.kubotaku.android.sample.sensordataviewer.model.ChannelEntity;
 import com.kubotaku.android.sample.sensordataviewer.model.StreamEntity;
 import com.kubotaku.android.sample.sensordataviewer.model.StreamValueEntity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 /**
  * Activity for Sensor Data view.
  */
-public class SensorDataActivity extends AppCompatActivity {
+public class SensorDataActivity extends AppCompatActivity
+                        implements OnDialogFragmentDismissListener {
 
     public static final String VIEW_NAME_HEADER_IMAGE = "view_name_header_image";
 
@@ -80,7 +84,6 @@ public class SensorDataActivity extends AppCompatActivity {
         ViewCompat.setTransitionName(topBackImageView, VIEW_NAME_HEADER_IMAGE);
 
         lineChart = (LineChart) findViewById(R.id.sensor_data_chart);
-        lineChart.setVisibility(View.GONE);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -94,47 +97,102 @@ public class SensorDataActivity extends AppCompatActivity {
 
             apiToken = AppPreferences.getApiToken(this);
 
-            final int sensorType = channelEntity.getSensorType();
-            switch (sensorType) {
-                case ChannelEntity.SENSOR_TEMPERATURE: {
-                    topBackImageView.setImageResource(R.mipmap.ic_temperature);
-
-                    new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_AVG_LAST_HOUR).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_MIN_LAST_HOUR).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_MAX_LAST_HOUR).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
-                }
-                break;
-
-                case ChannelEntity.SENSOR_OCCUPANCY:
-                    topBackImageView.setImageResource(R.mipmap.ic_launcher);
-                    disableAggegateValueArea();
-
-                    new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
-                    break;
-
-                case ChannelEntity.SENSOR_ROCKER_SWITCH:
-                    topBackImageView.setImageResource(R.mipmap.ic_bell_off);
-                    disableAggegateValueArea();
-
-                    new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
-                    break;
-
-                default:
-                    topBackImageView.setImageResource(R.mipmap.ic_launcher);
-                    disableAggegateValueArea();
-
-                    new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
-                    new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
-                    break;
-            }
-
+            setupTopBackImage();
+            getSensorData();
         }
     }
 
+    private void setupTopBackImage() {
+        ImageView topBackImageView = (ImageView) findViewById(R.id.data_view_image_back);
+        final int sensorType = channelEntity.getSensorType();
+        switch (sensorType) {
+            case ChannelEntity.SENSOR_TEMPERATURE: {
+                topBackImageView.setImageResource(R.mipmap.ic_temperature);
+            }
+            break;
+
+            case ChannelEntity.SENSOR_OCCUPANCY:
+                topBackImageView.setImageResource(R.mipmap.ic_launcher);
+                break;
+
+            case ChannelEntity.SENSOR_ROCKER_SWITCH:
+                topBackImageView.setImageResource(R.mipmap.ic_bell_off);
+                break;
+
+            default:
+                topBackImageView.setImageResource(R.mipmap.ic_launcher);
+                break;
+        }
+    }
+
+    private void getSensorData() {
+        final int sensorType = channelEntity.getSensorType();
+        switch (sensorType) {
+            case ChannelEntity.SENSOR_TEMPERATURE: {
+                new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_AVG_LAST_HOUR).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_MIN_LAST_HOUR).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_MAX_LAST_HOUR).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
+            }
+            break;
+
+            case ChannelEntity.SENSOR_OCCUPANCY:
+                disableAggegateValueArea();
+
+                new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
+                break;
+
+            case ChannelEntity.SENSOR_ROCKER_SWITCH:
+                disableAggegateValueArea();
+
+                new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
+                break;
+
+            default:
+                disableAggegateValueArea();
+
+                new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
+                new GetStreamDataTask(GetStreamDataTask.TASK_LAST_HOUR).execute();
+                break;
+        }
+    }
+
+    // --------------------------------------
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.sensor_data_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        switch (itemId) {
+            case R.id.menu_select_stream_time:
+                showSelectStreamTimeDialog();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showSelectStreamTimeDialog() {
+        final SelectStreamTimeFragment fragment = SelectStreamTimeFragment.newInstance();
+        fragment.show(getSupportFragmentManager(), null);
+    }
+
+    @Override
+    public void onDismiss() {
+        getSensorData();
+    }
+
+    // --------------------------------------
 
     private class GetStreamDataTask extends AsyncTask<Void, Void, StreamEntity> {
 
@@ -159,6 +217,12 @@ public class SensorDataActivity extends AppCompatActivity {
 
             StreamEntity entity = null;
 
+            final int selectTimeType = AppPreferences.getSelectTimeType(SensorDataActivity.this);
+            final int selectTimePresetIndex = AppPreferences.getSelectTimePresetIndex(SensorDataActivity.this);
+            final int presetTime = AppPreferences.convertTimePresetIndexToTime(selectTimePresetIndex);
+            final long selectTimeFrom = AppPreferences.getSelectTimeFrom(SensorDataActivity.this);
+            final long selectTimeTo = AppPreferences.getSelectTimeTo(SensorDataActivity.this);
+
             try {
                 ScalenicsAccessor scalenicsAccessor = new ScalenicsAccessor(apiToken);
 
@@ -167,20 +231,40 @@ public class SensorDataActivity extends AppCompatActivity {
                         entity = scalenicsAccessor.getNewestStreamData("" + channel);
                         break;
 
-                    case TASK_LAST_HOUR:
-                        entity = scalenicsAccessor.getLastOneHourStreamData("" + channel);
+                    case TASK_LAST_HOUR: {
+                        if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
+                            entity = scalenicsAccessor.getLastNHourStreamData("" + channel, presetTime);
+                        }else {
+                            entity = scalenicsAccessor.getSelectTimeStreamData("" + channel, selectTimeFrom, selectTimeTo);
+                        }
+                    }
                         break;
 
-                    case TASK_AVG_LAST_HOUR:
-                        entity = scalenicsAccessor.getLastOneHourAvgStreamData("" + channel);
+                    case TASK_AVG_LAST_HOUR: {
+                        if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
+                            entity = scalenicsAccessor.getLastNHourAvgStreamData("" + channel, presetTime);
+                        }else {
+                            entity = scalenicsAccessor.getSelectTimeAvgStreamData("" + channel, selectTimeFrom, selectTimeTo);
+                        }
+                    }
                         break;
 
-                    case TASK_MIN_LAST_HOUR:
-                        entity = scalenicsAccessor.getLastOneHourMinStreamData("" + channel);
+                    case TASK_MIN_LAST_HOUR: {
+                        if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
+                            entity = scalenicsAccessor.getLastNHourMinStreamData("" + channel, presetTime);
+                        }else {
+                            entity = scalenicsAccessor.getSelectTimeMinStreamData("" + channel, selectTimeFrom, selectTimeTo);
+                        }
+                    }
                         break;
 
-                    case TASK_MAX_LAST_HOUR:
-                        entity = scalenicsAccessor.getLastOneHourMaxStreamData("" + channel);
+                    case TASK_MAX_LAST_HOUR: {
+                        if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
+                            entity = scalenicsAccessor.getLastNHourMaxStreamData("" + channel, presetTime);
+                        }else {
+                            entity = scalenicsAccessor.getSelectTimeMaxStreamData("" + channel, selectTimeFrom, selectTimeTo);
+                        }
+                    }
                         break;
                 }
 
@@ -352,7 +436,41 @@ public class SensorDataActivity extends AppCompatActivity {
     // --------------------------------------------
 
     private void setupChartView() {
-        lineChart.setNoDataTextDescription("No Sensor Data...");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yy/MM/dd HH:mm");
+
+        String dateFromText;
+        String dateToText;
+
+        final int selectTimeType = AppPreferences.getSelectTimeType(SensorDataActivity.this);
+        if (selectTimeType == AppPreferences.SELECT_TIME_TYPE_PRESET) {
+            final int selectTimePresetIndex = AppPreferences.getSelectTimePresetIndex(SensorDataActivity.this);
+            final int presetTime = AppPreferences.convertTimePresetIndexToTime(selectTimePresetIndex);
+
+            Calendar calendar = Calendar.getInstance();
+            final Date now = calendar.getTime();
+            dateToText = sdf.format(now);
+
+            calendar.add(Calendar.HOUR_OF_DAY, -presetTime);
+            final Date startDate = calendar.getTime();
+            dateFromText = sdf.format(startDate);
+        } else {
+            final long selectTimeFrom = AppPreferences.getSelectTimeFrom(SensorDataActivity.this);
+            final long selectTimeTo = AppPreferences.getSelectTimeTo(SensorDataActivity.this);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(selectTimeFrom));
+            dateFromText = sdf.format(calendar.getTime());
+
+            calendar.setTime(new Date(selectTimeTo));
+            dateToText = sdf.format(calendar.getTime());
+        }
+
+        TextView textTime = (TextView) findViewById(R.id.sensor_data_text_time);
+        textTime.setText(
+                String.format(Locale.getDefault(), "%1$s - %2$s", dateFromText, dateToText));
+
+        lineChart.setDescription("");
         lineChart.setTouchEnabled(true);
         lineChart.setPinchZoom(true);
         lineChart.setDoubleTapToZoomEnabled(true);
@@ -387,6 +505,8 @@ public class SensorDataActivity extends AppCompatActivity {
     }
 
     private void showLastHourStreamData(StreamEntity entity) {
+        setupChartView();
+
         if (entity == null) {
             return;
         }
@@ -394,8 +514,6 @@ public class SensorDataActivity extends AppCompatActivity {
         if (entity.getStream() == null) {
             return;
         }
-
-        setupChartView();
 
         LineData lineData = createLineData(entity);
         lineData.setValueTextSize(11f);

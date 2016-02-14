@@ -160,12 +160,13 @@ public class ScalenicsAccessor {
     }
 
     /**
-     * 指定Channelの過去1hr分のStreamデータを取得する。
+     * 指定Channelの過去Nhr分のStreamデータを取得する。
      *
      * @param channel channel ID
+     * @param nHour   Get N hours ago data.
      * @return Streamデータ
      */
-    public StreamEntity getLastOneHourStreamData(final String channel) {
+    public StreamEntity getLastNHourStreamData(final String channel, final int nHour) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -173,8 +174,8 @@ public class ScalenicsAccessor {
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("T"), " ");
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("+"), "%2B");
 
-        // 1hour ago
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        // N hour ago
+        calendar.add(Calendar.HOUR_OF_DAY, -nHour);
         String oneHourAgoText = createISO8601FormatTextWithoutTimeZone(calendar);
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("T"), " ");
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("+"), "%2B");
@@ -183,12 +184,36 @@ public class ScalenicsAccessor {
     }
 
     /**
-     * 指定Channelの過去1hr分のStreamデータの平均値を取得する。
+     * 指定Channelの指定期間のStreamデータを取得する。
+     *
+     * @param channel  channel ID
+     * @param dateFrom 開始時刻(Unix Time)
+     * @param dateTo   終了時刻(Unix Time)
+     * @return Streamデータ
+     */
+    public StreamEntity getSelectTimeStreamData(final String channel, final long dateFrom, final long dateTo) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(dateFrom));
+        String dateFromText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateFromText = dateFromText.replaceAll(Pattern.quote("T"), " ");
+        dateFromText = dateFromText.replaceAll(Pattern.quote("+"), "%2B");
+
+        calendar.setTime(new Date(dateTo));
+        String dateToText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateToText = dateToText.replaceAll(Pattern.quote("T"), " ");
+        dateToText = dateToText.replaceAll(Pattern.quote("+"), "%2B");
+
+        return getStreamData(channel, dateFromText, dateToText);
+    }
+
+    /**
+     * 指定Channelの過去Nhr分のStreamデータの平均値を取得する。
      *
      * @param channel channel ID
+     * @param nHour   Get N hours ago data.
      * @return 平均値データ。
      */
-    public StreamEntity getLastOneHourAvgStreamData(final String channel) {
+    public StreamEntity getLastNHourAvgStreamData(final String channel, final int nHour) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -196,8 +221,8 @@ public class ScalenicsAccessor {
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("T"), " ");
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("+"), "%2B");
 
-        // 1hour ago
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        // N hour ago
+        calendar.add(Calendar.HOUR_OF_DAY, -nHour);
         String oneHourAgoText = createISO8601FormatTextWithoutTimeZone(calendar);
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("T"), " ");
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("+"), "%2B");
@@ -206,12 +231,36 @@ public class ScalenicsAccessor {
     }
 
     /**
+     * 指定Channelの指定期間のStreamデータの平均値を取得する。
+     *
+     * @param channel  channel ID
+     * @param dateFrom 開始時刻(Unix Time)
+     * @param dateTo   終了時刻(Unix Time)
+     * @return 平均値データ。
+     */
+    public StreamEntity getSelectTimeAvgStreamData(final String channel, final long dateFrom, final long dateTo) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(dateFrom));
+        String dateFromText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateFromText = dateFromText.replaceAll(Pattern.quote("T"), " ");
+        dateFromText = dateFromText.replaceAll(Pattern.quote("+"), "%2B");
+
+        calendar.setTime(new Date(dateTo));
+        String dateToText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateToText = dateToText.replaceAll(Pattern.quote("T"), " ");
+        dateToText = dateToText.replaceAll(Pattern.quote("+"), "%2B");
+
+        return getStreamData(channel, PARAM_AGGREGATE_AVG, dateFromText, dateToText);
+    }
+
+    /**
      * 指定Channelの過去1hr分のStreamデータの最小値を取得する。
      *
      * @param channel channel ID
+     * @param nHour   Get N hours ago data.
      * @return 最小値データ。
      */
-    public StreamEntity getLastOneHourMinStreamData(final String channel) {
+    public StreamEntity getLastNHourMinStreamData(final String channel, final int nHour) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -219,8 +268,8 @@ public class ScalenicsAccessor {
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("T"), " ");
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("+"), "%2B");
 
-        // 1hour ago
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        // N hour ago
+        calendar.add(Calendar.HOUR_OF_DAY, -nHour);
         String oneHourAgoText = createISO8601FormatTextWithoutTimeZone(calendar);
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("T"), " ");
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("+"), "%2B");
@@ -229,12 +278,36 @@ public class ScalenicsAccessor {
     }
 
     /**
+     * 指定Channelの指定期間のStreamデータの最小値を取得する。
+     *
+     * @param channel  channel ID
+     * @param dateFrom 開始時刻(Unix Time)
+     * @param dateTo   終了時刻(Unix Time)
+     * @return 最小値データ。
+     */
+    public StreamEntity getSelectTimeMinStreamData(final String channel, final long dateFrom, final long dateTo) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(dateFrom));
+        String dateFromText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateFromText = dateFromText.replaceAll(Pattern.quote("T"), " ");
+        dateFromText = dateFromText.replaceAll(Pattern.quote("+"), "%2B");
+
+        calendar.setTime(new Date(dateTo));
+        String dateToText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateToText = dateToText.replaceAll(Pattern.quote("T"), " ");
+        dateToText = dateToText.replaceAll(Pattern.quote("+"), "%2B");
+
+        return getStreamData(channel, PARAM_AGGREGATE_MIN, dateFromText, dateToText);
+    }
+
+    /**
      * 指定Channelの過去1hr分のStreamデータの最大値を取得する。
      *
      * @param channel channel ID
+     * @param nHour   Get N hours ago data.
      * @return 最大値データ。
      */
-    public StreamEntity getLastOneHourMaxStreamData(final String channel) {
+    public StreamEntity getLastNHourMaxStreamData(final String channel, final int nHour) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -242,13 +315,36 @@ public class ScalenicsAccessor {
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("T"), " ");
         currentTimeText = currentTimeText.replaceAll(Pattern.quote("+"), "%2B");
 
-        // 1hour ago
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        // N hour ago
+        calendar.add(Calendar.HOUR_OF_DAY, -nHour);
         String oneHourAgoText = createISO8601FormatTextWithoutTimeZone(calendar);
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("T"), " ");
         oneHourAgoText = oneHourAgoText.replaceAll(Pattern.quote("+"), "%2B");
 
         return getStreamData(channel, PARAM_AGGREGATE_MAX, oneHourAgoText, currentTimeText);
+    }
+
+    /**
+     * 指定Channelの指定期間のStreamデータの最大値を取得する。
+     *
+     * @param channel  channel ID
+     * @param dateFrom 開始時刻(Unix Time)
+     * @param dateTo   終了時刻(Unix Time)
+     * @return 最大値データ。
+     */
+    public StreamEntity getSelectTimeMaxStreamData(final String channel, final long dateFrom, final long dateTo) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(dateFrom));
+        String dateFromText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateFromText = dateFromText.replaceAll(Pattern.quote("T"), " ");
+        dateFromText = dateFromText.replaceAll(Pattern.quote("+"), "%2B");
+
+        calendar.setTime(new Date(dateTo));
+        String dateToText = createISO8601FormatTextWithoutTimeZone(calendar);
+        dateToText = dateToText.replaceAll(Pattern.quote("T"), " ");
+        dateToText = dateToText.replaceAll(Pattern.quote("+"), "%2B");
+
+        return getStreamData(channel, PARAM_AGGREGATE_MAX, dateFromText, dateToText);
     }
 
     /**

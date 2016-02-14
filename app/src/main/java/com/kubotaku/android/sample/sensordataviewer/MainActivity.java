@@ -47,8 +47,7 @@ import java.util.List;
 /**
  * Activity for Application Start view.
  */
-public class MainActivity extends AppCompatActivity
-        implements ApiTokenSettingDialogFragment.OnDialogDismissListener {
+public class MainActivity extends AppCompatActivity implements OnDialogFragmentDismissListener {
 
     private static final String FRAGMENT_TAG_SETTING = "fragment_setting_dlg";
 
