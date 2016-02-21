@@ -5,4 +5,10 @@
         android:title="@string/menu_set_api_token"
         android:showAsAction="ifRoom"
         />
+
+    <item
+        android:id="@+id/menu_set_weather"
+        android:title="@string/menu_set_weather"
+        android:showAsAction="ifRoom"
+        />
 </menu>

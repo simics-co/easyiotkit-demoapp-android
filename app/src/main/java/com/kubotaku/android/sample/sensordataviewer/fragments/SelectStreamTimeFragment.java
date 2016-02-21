@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kubotaku.android.sample.sensordataviewer;
+package com.kubotaku.android.sample.sensordataviewer.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -27,9 +27,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import com.kubotaku.android.sample.sensordataviewer.AppPreferences;
+import com.kubotaku.android.sample.sensordataviewer.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,9 +40,7 @@ import java.util.Date;
 /**
  * Fragment for select get data start time and end time.
  */
-public class SelectStreamTimeFragment extends DialogFragment implements OnDialogFragmentDismissListener {
-
-    private OnDialogFragmentDismissListener onDialogFragmentDismissListener;
+public class SelectStreamTimeFragment extends AbsDialogFragment implements OnDialogFragmentDismissListener {
 
     private int selectTimeType;
 
@@ -65,37 +64,6 @@ public class SelectStreamTimeFragment extends DialogFragment implements OnDialog
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof OnDialogFragmentDismissListener) {
-            onDialogFragmentDismissListener = (OnDialogFragmentDismissListener) context;
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        onDialogFragmentDismissListener = null;
-    }
-
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        final Dialog dialog = getDialog();
-        dialog.setCancelable(false);
-
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int dialogWidth = (int) (metrics.widthPixels * 0.95);
-
-        WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        lp.width = dialogWidth;
-        dialog.getWindow().setAttributes(lp);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -103,22 +71,12 @@ public class SelectStreamTimeFragment extends DialogFragment implements OnDialog
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        setupViews();
+    protected float getDialogWidthRatio() {
+        return 0.95f;
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-
-        if (onDialogFragmentDismissListener != null) {
-            onDialogFragmentDismissListener.onDismiss();
-        }
-    }
-
-    private void setupViews() {
+    protected void setupViews() {
 
         loadSelectTimeSettings();
 

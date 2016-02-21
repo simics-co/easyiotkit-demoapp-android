@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kubotaku.android.sample.sensordataviewer;
+package com.kubotaku.android.sample.sensordataviewer.fragments;
 
 
 import android.app.Activity;
@@ -30,6 +30,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.kubotaku.android.sample.sensordataviewer.AppPreferences;
+import com.kubotaku.android.sample.sensordataviewer.R;
 
 
 /**

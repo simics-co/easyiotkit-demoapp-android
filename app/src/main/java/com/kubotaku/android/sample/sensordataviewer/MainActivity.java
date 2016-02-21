@@ -16,10 +16,13 @@
 
 package com.kubotaku.android.sample.sensordataviewer;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +42,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kubotaku.android.sample.sensordataviewer.api.ScalenicsAccessor;
+import com.kubotaku.android.sample.sensordataviewer.fragments.ApiTokenSettingDialogFragment;
+import com.kubotaku.android.sample.sensordataviewer.fragments.OnDialogFragmentDismissListener;
+import com.kubotaku.android.sample.sensordataviewer.fragments.SelectWeatherPlaceFragment;
 import com.kubotaku.android.sample.sensordataviewer.model.ChannelEntity;
 
 import java.util.ArrayList;
@@ -47,9 +53,12 @@ import java.util.List;
 /**
  * Activity for Application Start view.
  */
-public class MainActivity extends AppCompatActivity implements OnDialogFragmentDismissListener {
+public class MainActivity extends AppCompatActivity
+        implements OnDialogFragmentDismissListener, SelectWeatherPlaceFragment.OnPermissionCheckListener {
 
-    private static final String FRAGMENT_TAG_SETTING = "fragment_setting_dlg";
+    private static final String FRAGMENT_TAG_API_TOKEN = "fragment_api_token_dlg";
+
+    private static final String FRAGMENT_TAG_WEATHER = "fragment_set_weather_dlg";
 
     private ProgressBar progressBar;
 
@@ -83,9 +92,17 @@ public class MainActivity extends AppCompatActivity implements OnDialogFragmentD
 
     private void showSetupApiTokenDialog() {
         final FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.findFragmentByTag(FRAGMENT_TAG_SETTING) == null) {
+        if (fragmentManager.findFragmentByTag(FRAGMENT_TAG_API_TOKEN) == null) {
             ApiTokenSettingDialogFragment fragment = ApiTokenSettingDialogFragment.newInstance();
-            fragment.show(fragmentManager, FRAGMENT_TAG_SETTING);
+            fragment.show(fragmentManager, FRAGMENT_TAG_API_TOKEN);
+        }
+    }
+
+    private void showSetupWeatherDialog() {
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(FRAGMENT_TAG_WEATHER) == null) {
+            final SelectWeatherPlaceFragment fragment = SelectWeatherPlaceFragment.newInstance();
+            fragment.show(fragmentManager, FRAGMENT_TAG_WEATHER);
         }
     }
 
@@ -155,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogFragmentD
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -167,10 +184,41 @@ public class MainActivity extends AppCompatActivity implements OnDialogFragmentD
                 showSetupApiTokenDialog();
                 return true;
 
+            case R.id.menu_set_weather:
+                showSetupWeatherDialog();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    // --------------------------------------
+
+    private int requestedCode;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == this.requestedCode) {
+            final FragmentManager fragmentManager = getSupportFragmentManager();
+            final Fragment fragment = fragmentManager.findFragmentByTag(FRAGMENT_TAG_WEATHER);
+            if ((fragment != null) && (fragment instanceof SelectWeatherPlaceFragment)) {
+                ((SelectWeatherPlaceFragment)fragment).onRequestPermissionResult();
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onRequestPermission(String[] permissions, int requestCode) {
+        this.requestedCode = requestCode;
+        ActivityCompat.requestPermissions(
+                this,
+                permissions,
+                requestCode);
+    }
+
 
     // --------------------------------------
 

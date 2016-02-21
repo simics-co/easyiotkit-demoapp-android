@@ -18,7 +18,9 @@ package com.kubotaku.android.sample.sensordataviewer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
@@ -28,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,7 +41,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.kubotaku.android.openweathermap.lib.WeatherInfo;
 import com.kubotaku.android.sample.sensordataviewer.api.ScalenicsAccessor;
+import com.kubotaku.android.sample.sensordataviewer.api.WeatherAPIWrapper;
+import com.kubotaku.android.sample.sensordataviewer.fragments.OnDialogFragmentDismissListener;
+import com.kubotaku.android.sample.sensordataviewer.fragments.SelectStreamTimeFragment;
 import com.kubotaku.android.sample.sensordataviewer.model.ChannelEntity;
 import com.kubotaku.android.sample.sensordataviewer.model.StreamEntity;
 import com.kubotaku.android.sample.sensordataviewer.model.StreamValueEntity;
@@ -60,8 +67,6 @@ public class SensorDataActivity extends AppCompatActivity
 
     private static final String PARAM_CHANNEL = "param_channel";
 
-    private static final String PARAM_CHANNEL_NAME = "param_channel_name";
-
     private LineChart lineChart;
 
     private ChannelEntity channelEntity;
@@ -71,6 +76,8 @@ public class SensorDataActivity extends AppCompatActivity
     private String channelName;
 
     private String apiToken;
+
+    private AppPreferences.WeatherPlaceInfo weatherPlaceSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +103,8 @@ public class SensorDataActivity extends AppCompatActivity
             getSupportActionBar().setTitle(channelName);
 
             apiToken = AppPreferences.getApiToken(this);
+
+            weatherPlaceSettings = AppPreferences.getWeatherPlaceSettings(this);
 
             setupTopBackImage();
             getSensorData();
@@ -129,6 +138,9 @@ public class SensorDataActivity extends AppCompatActivity
         final int sensorType = channelEntity.getSensorType();
         switch (sensorType) {
             case ChannelEntity.SENSOR_TEMPERATURE: {
+
+                getWeatherInformation();
+
                 new GetStreamDataTask(GetStreamDataTask.TASK_NEWEST).execute();
                 new GetStreamDataTask(GetStreamDataTask.TASK_AVG_LAST_HOUR).execute();
                 new GetStreamDataTask(GetStreamDataTask.TASK_MIN_LAST_HOUR).execute();
@@ -160,12 +172,20 @@ public class SensorDataActivity extends AppCompatActivity
         }
     }
 
+    private void getWeatherInformation() {
+        if (this.weatherPlaceSettings.useWeatherInfo) {
+            final String apiKey = this.weatherPlaceSettings.apiKey;
+            final WeatherAPIWrapper weatherAPIWrapper = new WeatherAPIWrapper(this, apiKey, onWeahterGetListener);
+            weatherAPIWrapper.getWeather(this.weatherPlaceSettings.latitude, this.weatherPlaceSettings.longitude);
+        }
+    }
+
     // --------------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.sensor_data_menu, menu);
+        inflater.inflate(R.menu.menu_sensor_data, menu);
         return true;
     }
 
@@ -532,8 +552,42 @@ public class SensorDataActivity extends AppCompatActivity
         this.lineChart.setVisibility(View.VISIBLE);
         this.lineChart.setAutoScaleMinMaxEnabled(true);
         this.lineChart.setVisibleXRangeMinimum(3f);
+//        this.lineChart.setVisibleXRangeMaximum(180);
         this.lineChart.invalidate();
         this.lineChart.animateX(1000);
+    }
+
+    // --------------------------------------------
+
+    private WeatherAPIWrapper.OnWeatherListener onWeahterGetListener = new WeatherAPIWrapper.OnWeatherListener() {
+        @Override
+        public void onGetWeatherInfo(WeatherInfo weatherInfo) {
+            showWeatherInfo(weatherInfo);
+        }
+    };
+
+    private void showWeatherInfo(WeatherInfo weatherInfo) {
+
+        ViewGroup cardView = (ViewGroup) findViewById(R.id.sensor_data_card_weather);
+        cardView.setVisibility(View.VISIBLE);
+
+        final String locationName = weatherInfo.getName();
+        final float currentTemp = weatherInfo.getCurrentTempCelsius();
+        final Bitmap icon = weatherInfo.getIcon();
+        final int humidity = weatherInfo.getHumidity();
+        final int pressure = weatherInfo.getPressure();
+
+        TextView textLocation = (TextView) findViewById(R.id.sensor_data_text_weather_location);
+        textLocation.setText(locationName);
+
+        TextView textCurrentTemp = (TextView) findViewById(R.id.sensor_data_text_weather_current_temp);
+        textCurrentTemp.setText(String.format(Locale.getDefault(), "%.1f℃", currentTemp));
+
+        TextView textMinMaxTemp = (TextView) findViewById(R.id.sensor_data_text_weather_minmax_temp);
+        textMinMaxTemp.setText(String.format(Locale.getDefault(), "%d％\n%dhPa", humidity, pressure));
+
+        ImageView imageIcon = (ImageView) findViewById(R.id.sensor_data_img_weather);
+        imageIcon.setImageBitmap(icon);
     }
 
     // --------------------------------------------

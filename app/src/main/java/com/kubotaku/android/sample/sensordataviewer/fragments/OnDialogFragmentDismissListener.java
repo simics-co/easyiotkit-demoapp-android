@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kubotaku.android.sample.sensordataviewer;
+package com.kubotaku.android.sample.sensordataviewer.fragments;
 
 /**
  * Interface for DialogFragment dismiss event.

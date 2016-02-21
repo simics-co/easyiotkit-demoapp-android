@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kubotaku.android.sample.sensordataviewer;
+package com.kubotaku.android.sample.sensordataviewer.fragments;
 
 
 import android.app.DatePickerDialog;
@@ -24,12 +24,10 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.DatePicker;
-import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.kubotaku.android.sample.sensordataviewer.AppPreferences;
 
 import java.util.Calendar;
 import java.util.Date;
