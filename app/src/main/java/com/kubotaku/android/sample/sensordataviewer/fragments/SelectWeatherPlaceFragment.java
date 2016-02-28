@@ -178,8 +178,7 @@ public class SelectWeatherPlaceFragment extends AbsDialogFragment {
         weatherPlaceSettings = AppPreferences.getWeatherPlaceSettings(context);
     }
 
-    private void saveWeatherPlaceSettings() {
-
+    private void updateWeatherPlaceSettings() {
         if (this.pickedPlace != null) {
             this.weatherPlaceSettings.name = this.pickedPlace.getName().toString();
             this.weatherPlaceSettings.latitude = this.pickedPlace.getLatLng().latitude;
@@ -192,6 +191,10 @@ public class SelectWeatherPlaceFragment extends AbsDialogFragment {
 
         EditText editApiKey = (EditText) view.findViewById(R.id.select_weather_edit_api_key);
         this.weatherPlaceSettings.apiKey = editApiKey.getText().toString();
+    }
+
+    private void saveWeatherPlaceSettings() {
+        updateWeatherPlaceSettings();
 
         final Context context = getContext();
         AppPreferences.saveWeatherPlaceSettings(context, this.weatherPlaceSettings);
@@ -212,6 +215,7 @@ public class SelectWeatherPlaceFragment extends AbsDialogFragment {
     private View.OnClickListener onClickSelectPlaceBtnListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            updateWeatherPlaceSettings();
             callPlacePicker();
         }
     };
