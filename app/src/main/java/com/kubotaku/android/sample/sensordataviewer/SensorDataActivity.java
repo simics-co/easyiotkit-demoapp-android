@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -518,8 +519,8 @@ public class SensorDataActivity extends AppCompatActivity
         dataSet.setLineWidth(3.0f);
         dataSet.setDrawCubic(false);
         dataSet.setDrawCircles(true);
-        dataSet.setCircleColor(Color.MAGENTA);
-        dataSet.setColor(Color.MAGENTA);
+        dataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_chart));
+        dataSet.setColor(ContextCompat.getColor(this, R.color.color_chart));
 
         return new LineData(xVals, dataSet);
     }
@@ -552,7 +553,6 @@ public class SensorDataActivity extends AppCompatActivity
         this.lineChart.setVisibility(View.VISIBLE);
         this.lineChart.setAutoScaleMinMaxEnabled(true);
         this.lineChart.setVisibleXRangeMinimum(3f);
-//        this.lineChart.setVisibleXRangeMaximum(180);
         this.lineChart.invalidate();
         this.lineChart.animateX(1000);
     }
