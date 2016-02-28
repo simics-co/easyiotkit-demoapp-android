@@ -133,7 +133,8 @@ public class AppPreferences {
     public static void saveApiToken(Context context, final String apiToken) {
         SharedPreferences prefs = getPrefs(context, PREFS_NAME);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_API_TOKEN, apiToken);
+        String encryptedText = AppUtil.encryptString(context, apiToken);
+        editor.putString(KEY_API_TOKEN, encryptedText);
         editor.commit();
     }
 
@@ -145,7 +146,8 @@ public class AppPreferences {
      */
     public static String getApiToken(Context context) {
         SharedPreferences prefs = getPrefs(context, PREFS_NAME);
-        return prefs.getString(KEY_API_TOKEN, null);
+        String encryptedText = prefs.getString(KEY_API_TOKEN, null);
+        return AppUtil.decryptString(context, encryptedText);
     }
 
     /**
@@ -299,10 +301,18 @@ public class AppPreferences {
         final SharedPreferences.Editor editor = prefs.edit();
 
         editor.putBoolean(KEY_USE_WEATHER_INFO, info.useWeatherInfo);
-        editor.putString(KEY_WEATHER_API_KEY, info.apiKey);
-        editor.putString(KEY_WEATHER_PLACE_NAME, info.name);
-        editor.putString(KEY_WEATHER_PLACE_LAT, "" + info.latitude);
-        editor.putString(KEY_WEATHER_PLACE_LON, "" + info.longitude);
+
+        String encryptedApiKey = AppUtil.encryptString(context, info.apiKey);
+        editor.putString(KEY_WEATHER_API_KEY, encryptedApiKey);
+
+        String encryptedName = AppUtil.encryptString(context, info.name);
+        editor.putString(KEY_WEATHER_PLACE_NAME, encryptedName);
+
+        String encryptedLat = AppUtil.encryptString(context, "" + info.latitude);
+        editor.putString(KEY_WEATHER_PLACE_LAT, encryptedLat);
+
+        String encryptedLon = AppUtil.encryptString(context, "" + info.longitude);
+        editor.putString(KEY_WEATHER_PLACE_LON, encryptedLon);
 
         editor.commit();
     }
@@ -317,14 +327,27 @@ public class AppPreferences {
         final SharedPreferences prefs = getPrefs(context, PREFS_NAME);
 
         final boolean useWeatherInfo = prefs.getBoolean(KEY_USE_WEATHER_INFO, false);
-        final String apiKey = prefs.getString(KEY_WEATHER_API_KEY, "");
-        final String name = prefs.getString(KEY_WEATHER_PLACE_NAME, "Not Set");
 
-        final String latText = prefs.getString(KEY_WEATHER_PLACE_LAT, "0");
-        double lat = Double.parseDouble(latText);
+        final String encryptedApiKey = prefs.getString(KEY_WEATHER_API_KEY, "");
+        final String apiKey = AppUtil.decryptString(context, encryptedApiKey);
 
-        final String lonText = prefs.getString(KEY_WEATHER_PLACE_LON, "0");
-        double lon = Double.parseDouble(lonText);
+        final String encryptedName = prefs.getString(KEY_WEATHER_PLACE_NAME, "Not Set");
+        final String name = AppUtil.decryptString(context, encryptedName);
+
+        final String encryptedLatText = prefs.getString(KEY_WEATHER_PLACE_LAT, "");
+        final String latText = AppUtil.decryptString(context, encryptedLatText);
+        double lat = 0;
+
+        final String encryptedLonText = prefs.getString(KEY_WEATHER_PLACE_LON, "");
+        final String lonText = AppUtil.decryptString(context, encryptedLonText);
+        double lon = 0;
+
+        try {
+            lat = Double.parseDouble(latText);
+            lon = Double.parseDouble(lonText);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         WeatherPlaceInfo info = new WeatherPlaceInfo(useWeatherInfo, apiKey, name, lat, lon);
         return info;

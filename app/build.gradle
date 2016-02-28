@@ -34,4 +34,5 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.0'
     compile 'com.kubotaku:openweathermap-lib:0.1.3'
     compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'org.jetbrains:annotations:13.0'
 }

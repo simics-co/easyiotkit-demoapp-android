@@ -16,6 +16,7 @@
 
 package com.kubotaku.android.sample.sensordataviewer;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,7 +25,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
+import android.security.KeyPairGeneratorSpec;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -32,69 +39,233 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.jetbrains.annotations.Contract;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.security.auth.x500.X500Principal;
+
 /**
  * Application Common Utility class.
  */
 public class AppUtil {
 
-    public static boolean checkGooglePlayService(final Activity activity, final int requestID) {
-        boolean enable = true;
-        final GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-        final int result = googleApiAvailability.isGooglePlayServicesAvailable(activity);
-        if (result != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(result)) {
-                Dialog dialog = googleApiAvailability.getErrorDialog(activity, result, requestID);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        Toast t = Toast.makeText(activity, "Google Play開発者サービスが必要です", Toast.LENGTH_LONG);
-                        t.setGravity(Gravity.CENTER, 0, 0);
-                        t.show();
-                        activity.finish();
-                    }
-                });
-                dialog.show();
-                enable = false;
-            }
+    private static final String KEY_PROVIDER = "AndroidKeyStore";
+
+    private static final String KEY_ALIAS = "otegaru_iot";
+
+    // Cipher algorithm (api level 18 - 22)
+    private static final String ALGORITHM_OLD = "RSA/ECB/PKCS1Padding";
+
+    // Cipher algorithm (api level 23+)
+    private static final String ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+
+    /**
+     * 指定の文字列を暗号化（+ Base64化）する。
+     * <p>
+     * ただし、API Level 18以降のみ有効。それ以前の端末ではもとの文字列がそのまま返る
+     * </p>
+     *
+     * @param context   コンテキスト
+     * @param plainText 文字列
+     * @return 暗号化（+ Base64化）された文字列
+     */
+    @Contract("_, null -> null")
+    public static String encryptString(Context context, final String plainText) {
+        if (plainText == null) {
+            return plainText;
         }
-        return enable;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return encryptStringImpl(context, plainText);
+        } else {
+            return plainText;
+        }
     }
 
-    public static void checkLocationProvider(final Context context) {
-        int locationMode = 0;
-        String locationProviders;
-
-        boolean enable = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            enable =  locationMode != Settings.Secure.LOCATION_MODE_OFF;
-
-        }else{
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            enable = !TextUtils.isEmpty(locationProviders);
+    /**
+     * 暗号化された文字列を複合する。
+     * <p>
+     * ただし、API Level 18以降のみ有効。それ以前の端末ではもとの文字列がそのまま返る
+     * </p>
+     *
+     * @param context       コンテキスト
+     * @param encryptedText 暗号化された文字列
+     * @return 複合された文字列
+     */
+    @Contract("_, null -> null")
+    public static String decryptString(Context context, final String encryptedText) {
+        if (encryptedText == null) {
+            return encryptedText;
         }
 
-        if (!enable) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return decryptStringImpl(context, encryptedText);
+        } else {
+            return encryptedText;
+        }
+    }
 
-            builder.setTitle(R.string.dialog_title_location_service);
-            builder.setMessage(R.string.dialog_message_location_service);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    context.startActivity(intent);
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private static String encryptStringImpl(Context context, final String plainText) {
+        String encryptedText = plainText;
+        try {
+            final KeyStore keyStore = getKeyStore(context);
+
+            PublicKey publicKey = keyStore.getCertificate(KEY_ALIAS).getPublicKey();
+
+            String algorithm = ALGORITHM_OLD;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                algorithm = ALGORITHM;
+            }
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            CipherOutputStream cipherOutputStream = new CipherOutputStream(
+                    outputStream, cipher);
+            cipherOutputStream.write(plainText.getBytes("UTF-8"));
+            cipherOutputStream.close();
+
+            byte[] bytes = outputStream.toByteArray();
+            encryptedText = Base64.encodeToString(bytes, Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return encryptedText;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private static String decryptStringImpl(Context context, final String encryptedText) {
+        String plainText = null;
+        try {
+            final KeyStore keyStore = getKeyStore(context);
+
+            PrivateKey privateKey = (PrivateKey) keyStore.getKey(KEY_ALIAS, null);
+
+            String algorithm = ALGORITHM_OLD;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                algorithm = ALGORITHM;
+            }
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            CipherInputStream cipherInputStream = new CipherInputStream(
+                    new ByteArrayInputStream(Base64.decode(encryptedText, Base64.DEFAULT)), cipher);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            int b;
+            while ((b = cipherInputStream.read()) != -1) {
+                outputStream.write(b);
+            }
+            outputStream.close();
+            plainText = outputStream.toString("UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return plainText;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private static KeyStore getKeyStore(Context context) {
+        KeyStore keyStore = null;
+        try {
+            keyStore = KeyStore.getInstance(KEY_PROVIDER);
+            keyStore.load(null);
+
+            if (!keyStore.containsAlias(KEY_ALIAS)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // for api level 23+
+                    generateNewKey();
+                } else {
+                    // for api level 18 - 22
+                    generateNewKeyOld(context);
                 }
-            });
-            builder.setCancelable(false);
-            builder.create();
-            builder.show();
+            }
+
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return keyStore;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private static void generateNewKey() {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_RSA, KEY_PROVIDER);
+
+            keyPairGenerator.initialize(
+                    new KeyGenParameterSpec.Builder(
+                            KEY_ALIAS,
+                            KeyProperties.PURPOSE_DECRYPT)
+                            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+                            .build());
+            keyPairGenerator.generateKeyPair();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private static void generateNewKeyOld(Context context) {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_RSA, KEY_PROVIDER);
+
+            Calendar instance = Calendar.getInstance();
+            Date start = instance.getTime();
+
+            instance.add(Calendar.YEAR, 1);
+            Date end = instance.getTime();
+
+            keyPairGenerator.initialize(
+                    new KeyPairGeneratorSpec.Builder(context)
+                            .setAlias(KEY_ALIAS)
+                            .setSubject(new X500Principal("CN=" + KEY_ALIAS))
+                            .setSerialNumber(BigInteger.valueOf(20151021))
+                            .setStartDate(start)
+                            .setEndDate(end)
+                            .build());
+
+            keyPairGenerator.generateKeyPair();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
         }
     }
 }
