@@ -16,9 +16,7 @@
 
 package com.kubotaku.android.sample.sensordataviewer;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -354,7 +352,7 @@ public class MainActivity extends AppCompatActivity
                         break;
 
                     case ChannelEntity.SENSOR_OCCUPANCY:
-                        holder.icon.setImageResource(R.mipmap.ic_launcher);
+                        holder.icon.setImageResource(R.mipmap.ic_occupancy_off);
                         break;
 
                     case ChannelEntity.SENSOR_ROCKER_SWITCH:

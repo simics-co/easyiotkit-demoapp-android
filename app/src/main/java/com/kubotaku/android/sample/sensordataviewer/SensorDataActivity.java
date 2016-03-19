@@ -122,7 +122,7 @@ public class SensorDataActivity extends AppCompatActivity
             break;
 
             case ChannelEntity.SENSOR_OCCUPANCY:
-                topBackImageView.setImageResource(R.mipmap.ic_launcher);
+                topBackImageView.setImageResource(R.mipmap.ic_occupancy_off);
                 break;
 
             case ChannelEntity.SENSOR_ROCKER_SWITCH:
