@@ -123,7 +123,7 @@ public class ApiTokenSettingDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
 
         if (this.onDialogDismissListener != null) {
-            this.onDialogDismissListener.onDismiss();
+            this.onDialogDismissListener.onDismissDialog(true);
         }
     }
 

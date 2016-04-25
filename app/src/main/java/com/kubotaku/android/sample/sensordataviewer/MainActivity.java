@@ -41,6 +41,7 @@ import android.widget.Toast;
 
 import com.kubotaku.android.sample.sensordataviewer.api.ScalenicsAccessor;
 import com.kubotaku.android.sample.sensordataviewer.fragments.ApiTokenSettingDialogFragment;
+import com.kubotaku.android.sample.sensordataviewer.fragments.LicenseDialogFragment;
 import com.kubotaku.android.sample.sensordataviewer.fragments.OnDialogFragmentDismissListener;
 import com.kubotaku.android.sample.sensordataviewer.fragments.SelectWeatherPlaceFragment;
 import com.kubotaku.android.sample.sensordataviewer.model.ChannelEntity;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity
     private static final String FRAGMENT_TAG_API_TOKEN = "fragment_api_token_dlg";
 
     private static final String FRAGMENT_TAG_WEATHER = "fragment_set_weather_dlg";
+
+    private static final String FRAGMENT_TAG_LICENSE = "fragment_license_dlg";
 
     private ProgressBar progressBar;
 
@@ -104,8 +107,20 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void showLicenseDialog() {
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(FRAGMENT_TAG_LICENSE) == null) {
+            final LicenseDialogFragment fragment = LicenseDialogFragment.newInstance();
+            fragment.show(fragmentManager, FRAGMENT_TAG_LICENSE);
+        }
+    }
+
     @Override
-    public void onDismiss() {
+    public void onDismissDialog(boolean needUpdate) {
+        if (!needUpdate) {
+            return;
+        }
+
         if (checkApiToken()) {
             getChannelInfo();
         }
@@ -184,6 +199,10 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.menu_set_weather:
                 showSetupWeatherDialog();
+                return true;
+
+            case R.id.menu_license:
+                showLicenseDialog();
                 return true;
 
             default:

@@ -192,7 +192,7 @@ public class DateTimePickerFragment extends DialogFragment
         }
 
         if (onDialogFragmentDismissListener != null) {
-            onDialogFragmentDismissListener.onDismiss();
+            onDialogFragmentDismissListener.onDismissDialog(true);
         }
     }
 

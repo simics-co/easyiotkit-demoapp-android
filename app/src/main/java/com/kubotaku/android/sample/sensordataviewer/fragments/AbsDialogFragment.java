@@ -21,15 +21,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.TextView;
-
-import com.kubotaku.android.sample.sensordataviewer.R;
 
 /**
  * Dialog common abstraction class.
@@ -74,7 +67,7 @@ public abstract class AbsDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
 
         if (onDialogFragmentDismissListener != null) {
-            onDialogFragmentDismissListener.onDismiss();
+            onDialogFragmentDismissListener.onDismissDialog(false);
         }
     }
 

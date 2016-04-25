@@ -9,7 +9,7 @@
 直ぐさまセンサーデータがクラウドにあがります。
 
 このアプリケーションは、クラウドのデータをAndroid端末上で確認するためのデモアプリケーションです。  
-ビルド済みのアプリケーションをGoogle Playで公開しています（現在α公開）。  
+ビルド済みのアプリケーションを[**Google Play**](https://play.google.com/store/apps/details?id=com.kubotaku.android.sample.sensordataviewer)で公開しています。  
 キット入手後、APIトークンをアプリケーションで入力することで、すぐに動作を確認することができます。
 
 

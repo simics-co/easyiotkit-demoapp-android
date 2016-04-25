@@ -337,7 +337,7 @@ public class SelectStreamTimeFragment extends AbsDialogFragment implements OnDia
     };
 
     @Override
-    public void onDismiss() {
+    public void onDismissDialog(boolean needUpdate) {
         final Context context = getContext();
         selectTimeFrom = AppPreferences.getSelectTimeFrom(context);
         selectTimeTo = AppPreferences.getSelectTimeTo(context);

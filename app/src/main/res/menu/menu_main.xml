@@ -11,4 +11,10 @@
         android:title="@string/menu_set_weather"
         android:showAsAction="ifRoom"
         />
+
+    <item
+        android:id="@+id/menu_license"
+        android:title="Open Source License"
+        android:showAsAction="ifRoom"
+        />
 </menu>

@@ -21,6 +21,6 @@ package com.kubotaku.android.sample.sensordataviewer.fragments;
  */
 public interface OnDialogFragmentDismissListener {
 
-    void onDismiss();
+    void onDismissDialog(boolean needUpdate);
 
 }

@@ -209,7 +209,7 @@ public class SensorDataActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDismiss() {
+    public void onDismissDialog(boolean needUpdate) {
         getSensorData();
     }
 
